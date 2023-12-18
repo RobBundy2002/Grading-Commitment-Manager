@@ -1,27 +1,37 @@
 import tkinter as tk
+import sqlite3
+from flask import Flask, render_template, request
 
-# Initialize an empty dictionary to store grading commitments
-grading_commitments = {}
+app = Flask(__name__)
+
+# Create SQLite database and table
+conn = sqlite3.connect('grading_commitments.db')
+cursor = conn.cursor()
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS commitments (
+        user TEXT,
+        subject TEXT
+    )
+''')
+conn.commit()
 
 def add_commitment(user, subject):
     """Add a grading commitment for a user."""
-    if user not in grading_commitments:
-        grading_commitments[user] = []
-    grading_commitments[user].append(subject)
+    cursor.execute("INSERT INTO commitments (user, subject) VALUES (?, ?)", (user, subject))
+    conn.commit()
 
 def take_over_commitment(user, taker, subject):
     """Allow a user to take over another user's grading commitment."""
-    if user in grading_commitments and subject in grading_commitments[user]:
-        grading_commitments[user].remove(subject)
-        add_commitment(taker, subject)
+    cursor.execute("DELETE FROM commitments WHERE user = ? AND subject = ?", (user, subject))
+    add_commitment(taker, subject)
+    conn.commit()
 
 def view_commitments(user):
     """View a user's grading commitments."""
-    if user in grading_commitments:
-        commitments = grading_commitments[user]
-        return "\n".join(commitments)
-    else:
-        return f"{user} has no grading commitments."
+    cursor.execute("SELECT subject FROM commitments WHERE user = ?", (user,))
+    commitments = cursor.fetchall()
+    return "\n".join(commitment[0] for commitment in commitments)
+
 
 def add_commitment_button():
     user = name_entry.get()
@@ -111,13 +121,13 @@ status_label = tk.Label(root, text="")
 status_label.pack(pady=pad_y, padx=pad_x)
 
 root.mainloop()
-
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-# Initialize an empty dictionary to store grading commitments
-grading_commitments = {}
+# Use the existing SQLite connection and cursor
+conn = sqlite3.connect('grading_commitments.db')
+cursor = conn.cursor()
 
 # Your existing functions here...
 
