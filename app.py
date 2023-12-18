@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk, messagebox
 import sqlite3
 from flask import Flask, render_template, request
 
@@ -15,16 +16,39 @@ cursor.execute('''
 ''')
 conn.commit()
 
+
 def add_commitment(user, subject):
     """Add a grading commitment for a user."""
-    cursor.execute("INSERT INTO commitments (user, subject) VALUES (?, ?)", (user, subject))
-    conn.commit()
+    # Check if the assignment already exists for the user
+    cursor.execute("SELECT * FROM commitments WHERE user = ? AND subject = ?", (user, subject))
+    existing_commitment = cursor.fetchone()
+
+    if existing_commitment:
+        # Assignment already exists, display an error message
+        messagebox.showinfo("Error", f"{user} already has a grading commitment for {subject}.")
+    else:
+        # Assignment doesn't exist, add it
+        cursor.execute("INSERT INTO commitments (user, subject) VALUES (?, ?)", (user, subject))
+        conn.commit()
 
 def take_over_commitment(user, taker, subject):
     """Allow a user to take over another user's grading commitment."""
-    cursor.execute("DELETE FROM commitments WHERE user = ? AND subject = ?", (user, subject))
-    add_commitment(taker, subject)
-    conn.commit()
+    # Check if the commitment exists for the specified user
+    cursor.execute("SELECT * FROM commitments WHERE user = ? AND subject = ?", (user, subject))
+    existing_commitment = cursor.fetchone()
+
+    if existing_commitment:
+        # Commitment exists, proceed with takeover
+        cursor.execute("DELETE FROM commitments WHERE user = ? AND subject = ?", (user, subject))
+        add_commitment(taker, subject)
+        conn.commit()
+        status_label.config(text=f"{taker} has taken over {user}'s grading commitment for {subject}.")
+    else:
+        # Commitment doesn't exist for the specified user
+        messagebox.showinfo("Error", f"{user}'s grading commitment for {subject} does not exist.")
+
+    refresh_commitments()
+
 
 def view_commitments(user):
     """View a user's grading commitments."""
@@ -42,26 +66,25 @@ def add_commitment_button():
     assignment_entry.delete(0, tk.END)  # Clear the assignment field
     refresh_commitments()
 
+
 def take_over_commitment_button():
     user = original_user_entry.get()
     taker = taker_entry.get()
     subject = assignment_takeover_entry.get()
     take_over_commitment(user, taker, subject)
-    status_label.config(text=f"{taker} has taken over {user}'s grading commitment for {subject}.")
-    original_user_entry.delete(0, tk.END)  # Clear the original user field
-    taker_entry.delete(0, tk.END)  # Clear the taker field
-    assignment_takeover_entry.delete(0, tk.END)  # Clear the assignment takeover field
-    refresh_commitments()
+
 
 def view_commitments_button():
     user = view_user_entry.get()
     commitments = view_commitments(user)
     commitments_label.config(text=commitments)
 
+
 def refresh_commitments():
     user = view_user_entry.get()
     commitments = view_commitments(user)
     commitments_label.config(text=commitments)
+
 
 # Create the main window
 root = tk.Tk()
@@ -75,49 +98,53 @@ root.configure(bg="#f0f0f0")  # Set background color
 pad_y = 5
 pad_x = 20
 
-name_label = tk.Label(root, text="Your Name:")
+style = ttk.Style()
+style.configure('TButton', padding=6, font=('Helvetica', 10, 'bold'))
+style.configure('TEntry', padding=6, font=('Helvetica', 10))
+
+name_label = ttk.Label(root, text="Your Name:")
 name_label.pack(pady=pad_y, padx=pad_x)
-name_entry = tk.Entry(root)
+name_entry = ttk.Entry(root)
 name_entry.pack(pady=pad_y, padx=pad_x)
 
-assignment_label = tk.Label(root, text="Assignment:")
+assignment_label = ttk.Label(root, text="Assignment:")
 assignment_label.pack(pady=pad_y, padx=pad_x)
-assignment_entry = tk.Entry(root)
+assignment_entry = ttk.Entry(root)
 assignment_entry.pack(pady=pad_y, padx=pad_x)
 
-add_button = tk.Button(root, text="Add Commitment", command=add_commitment_button)
+add_button = ttk.Button(root, text="Add Commitment", command=add_commitment_button)
 add_button.pack(pady=pad_y, padx=pad_x)
 
-original_user_label = tk.Label(root, text="Original User:")
+original_user_label = ttk.Label(root, text="Original User:")
 original_user_label.pack(pady=pad_y, padx=pad_x)
-original_user_entry = tk.Entry(root)
+original_user_entry = ttk.Entry(root)
 original_user_entry.pack(pady=pad_y, padx=pad_x)
 
-taker_label = tk.Label(root, text="Taker:")
+taker_label = ttk.Label(root, text="Taker:")
 taker_label.pack(pady=pad_y, padx=pad_x)
-taker_entry = tk.Entry(root)
+taker_entry = ttk.Entry(root)
 taker_entry.pack(pady=pad_y, padx=pad_x)
 
-assignment_takeover_label = tk.Label(root, text="Assignment:")
+assignment_takeover_label = ttk.Label(root, text="Assignment:")
 assignment_takeover_label.pack(pady=pad_y, padx=pad_x)
-assignment_takeover_entry = tk.Entry(root)
+assignment_takeover_entry = ttk.Entry(root)
 assignment_takeover_entry.pack(pady=pad_y, padx=pad_x)
 
-take_over_button = tk.Button(root, text="Take Over Commitment", command=take_over_commitment_button)
+take_over_button = ttk.Button(root, text="Take Over Commitment", command=take_over_commitment_button)
 take_over_button.pack(pady=pad_y, padx=pad_x)
 
-view_user_label = tk.Label(root, text="View Commitments for:")
+view_user_label = ttk.Label(root, text="View Commitments for:")
 view_user_label.pack(pady=pad_y, padx=pad_x)
-view_user_entry = tk.Entry(root)
+view_user_entry = ttk.Entry(root)
 view_user_entry.pack(pady=pad_y, padx=pad_x)
 
-view_button = tk.Button(root, text="View Commitments", command=view_commitments_button)
+view_button = ttk.Button(root, text="View Commitments", command=view_commitments_button)
 view_button.pack(pady=pad_y, padx=pad_x)
 
-commitments_label = tk.Label(root, text="")
+commitments_label = ttk.Label(root, text="")
 commitments_label.pack(pady=pad_y, padx=pad_x)
 
-status_label = tk.Label(root, text="")
+status_label = ttk.Label(root, text="")
 status_label.pack(pady=pad_y, padx=pad_x)
 
 root.mainloop()
@@ -129,7 +156,6 @@ app = Flask(__name__)
 conn = sqlite3.connect('grading_commitments.db')
 cursor = conn.cursor()
 
-# Your existing functions here...
 
 @app.route('/')
 def home():
