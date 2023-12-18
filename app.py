@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
 from flask import Flask, render_template, request
+import sys
 
 app = Flask(__name__)
 
@@ -11,7 +12,8 @@ cursor = conn.cursor()
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS commitments (
         user TEXT,
-        subject TEXT
+        subject TEXT,
+        PRIMARY KEY (user, subject)
     )
 ''')
 conn.commit()
@@ -86,29 +88,38 @@ def refresh_commitments():
     commitments_label.config(text=commitments)
 
 
+def on_closing():
+    root.destroy()
+    sys.exit()
+
+
 # Create the main window
 root = tk.Tk()
 root.title("Grading Commitments Manager")
 
 # Styling
 root.geometry("400x800")  # Set the window size
-root.configure(bg="#f0f0f0")  # Set background color
+root.configure(bg="#333333")  # Set background color
+root.option_add('*TButton*highlightBackground', '#333333')  # Set button highlight color
 
 # Create and arrange widgets with padding
 pad_y = 5
 pad_x = 20
 
 style = ttk.Style()
-style.configure('TButton', padding=6, font=('Helvetica', 10, 'bold'))
-style.configure('TEntry', padding=6, font=('Helvetica', 10))
+style.configure('TButton', padding=6, font=('Helvetica', 10, 'bold'), background='black', foreground='black')  # Set button color to black
+style.configure('TEntry', padding=6, font=('Helvetica', 10), background='#555555', foreground='black')  # Set text color to black
+style.configure('TLabel', font=('Helvetica', 10), background='#333333', foreground='white')
 
 name_label = ttk.Label(root, text="Your Name:")
 name_label.pack(pady=pad_y, padx=pad_x)
+
 name_entry = ttk.Entry(root)
 name_entry.pack(pady=pad_y, padx=pad_x)
 
 assignment_label = ttk.Label(root, text="Assignment:")
 assignment_label.pack(pady=pad_y, padx=pad_x)
+
 assignment_entry = ttk.Entry(root)
 assignment_entry.pack(pady=pad_y, padx=pad_x)
 
@@ -117,16 +128,19 @@ add_button.pack(pady=pad_y, padx=pad_x)
 
 original_user_label = ttk.Label(root, text="Original User:")
 original_user_label.pack(pady=pad_y, padx=pad_x)
+
 original_user_entry = ttk.Entry(root)
 original_user_entry.pack(pady=pad_y, padx=pad_x)
 
 taker_label = ttk.Label(root, text="Taker:")
 taker_label.pack(pady=pad_y, padx=pad_x)
+
 taker_entry = ttk.Entry(root)
 taker_entry.pack(pady=pad_y, padx=pad_x)
 
 assignment_takeover_label = ttk.Label(root, text="Assignment:")
 assignment_takeover_label.pack(pady=pad_y, padx=pad_x)
+
 assignment_takeover_entry = ttk.Entry(root)
 assignment_takeover_entry.pack(pady=pad_y, padx=pad_x)
 
@@ -135,6 +149,7 @@ take_over_button.pack(pady=pad_y, padx=pad_x)
 
 view_user_label = ttk.Label(root, text="View Commitments for:")
 view_user_label.pack(pady=pad_y, padx=pad_x)
+
 view_user_entry = ttk.Entry(root)
 view_user_entry.pack(pady=pad_y, padx=pad_x)
 
@@ -146,6 +161,8 @@ commitments_label.pack(pady=pad_y, padx=pad_x)
 
 status_label = ttk.Label(root, text="")
 status_label.pack(pady=pad_y, padx=pad_x)
+
+root.protocol("WM_DELETE_WINDOW", on_closing)  # Handle window closing
 
 root.mainloop()
 from flask import Flask, render_template, request
