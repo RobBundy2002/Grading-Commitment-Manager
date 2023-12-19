@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grading Commitments Manager</title>
+</head>
+<body>
+    <h1>Grading Commitments Manager</h1>
+
+    <h2>Add Commitment</h2>
+    <form action="/add_commitment" method="POST">
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" name="name" required><br>
+        <label for="assignment">Assignment:</label>
+        <input type="text" id="assignment" name="assignment" required><br>
+        <button type="submit">Add Commitment</button>
+    </form>
+
+
+    <h2>Commitments</h2>
+    <div id="commitments"></div>
+
+    <script>
+    </script>
+</body>
+</html>

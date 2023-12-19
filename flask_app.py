@@ -10,9 +10,11 @@ app = Flask(__name__)
 conn = sqlite3.connect('grading_commitments.db')
 cursor = conn.cursor()
 
+
 @app.route('/')
 def home():
     return render_template('index.html')
+
 
 @app.route('/add_commitment', methods=['POST'])
 def add_commitment_route():
@@ -20,6 +22,7 @@ def add_commitment_route():
     subject = request.form['assignment']
     add_commitment(user, subject)
     return "Commitment added successfully."
+
 
 @app.route('/take_over_commitment', methods=['POST'])
 def take_over_commitment_route():
@@ -29,11 +32,13 @@ def take_over_commitment_route():
     take_over_commitment(user, taker, subject)
     return "Commitment taken over successfully."
 
+
 @app.route('/view_commitments', methods=['POST'])
 def view_commitments_route():
     user = request.form['view_user']
     commitments = view_commitments(user)
     return commitments
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -4,6 +4,8 @@ from tkinter import messagebox
 
 conn = sqlite3.connect('grading_commitments.db')
 cursor = conn.cursor()
+
+
 def add_commitment(user, subject):
     """Add a grading commitment for a user."""
     # Check if the assignment already exists for the user
@@ -17,6 +19,7 @@ def add_commitment(user, subject):
         # Assignment doesn't exist, add it
         cursor.execute("INSERT INTO commitments (user, subject) VALUES (?, ?)", (user, subject))
         conn.commit()
+
 
 def take_over_commitment(user, taker, subject):
     """Allow a user to take over another user's grading commitment."""
@@ -45,9 +48,9 @@ def view_commitments(user):
     commitments = cursor.fetchall()
     return "\n".join(commitment[0] for commitment in commitments)
 
+
 def delete_commitment(user, subject, status_label, refresh_func):
     cursor.execute("DELETE FROM commitments WHERE user = ? AND subject = ?", (user, subject))
     conn.commit()
     status_label.config(text=f"{user}'s grading commitment for {subject} has been deleted.")
     refresh_func()
-

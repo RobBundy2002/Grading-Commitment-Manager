@@ -1,7 +1,7 @@
 
 import sys
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 from database_operations import add_commitment, take_over_commitment, view_commitments, delete_commitment
 
 
@@ -14,16 +14,19 @@ def add_commitment_button():
     assignment_entry.delete(0, tk.END)  # Clear the assignment field
     refresh_commitments()
 
+
 def take_over_commitment_button():
     user = original_user_entry.get()
     taker = taker_entry.get()
     subject = assignment_takeover_entry.get()
     take_over_commitment(user, taker, subject)
 
+
 def view_commitments_button():
     user = view_user_entry.get()
     commitments = view_commitments(user)
     commitments_label.config(text=commitments)
+
 
 def delete_commitment_button():
     user = delete_user_entry.get()
@@ -36,9 +39,11 @@ def refresh_commitments():
     commitments = view_commitments(user)
     commitments_label.config(text=commitments)
 
+
 def on_closing():
     root.destroy()
     sys.exit()
+
 
 # Create the main window
 root = tk.Tk()
@@ -129,7 +134,7 @@ delete_button.grid(row=6, column=0, columnspan=2, pady=pad_y, padx=pad_x)
 status_label = ttk.Label(root, text="")
 status_label.grid(row=1, column=0, columnspan=2, pady=pad_y, padx=pad_x)
 
-cs_label = tk.Label(root, text="CS1112 Grading Manager", font=("Helvetica",19, "bold"), fg="#ff9900", bg="darkblue")
+cs_label = tk.Label(root, text="CS1112 Grading Manager", font=("Helvetica", 19, "bold"), fg="#ff9900", bg="darkblue")
 cs_label.grid(row=0, column=0, pady=5, padx=5, sticky=tk.NW)
 
 root.protocol("WM_DELETE_WINDOW", on_closing)  # Handle window closing
